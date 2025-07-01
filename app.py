@@ -1,5 +1,5 @@
 from flask import Flask, request, abort, jsonify, redirect
-from .database.models import *
+from models import *
 from flask_cors import CORS
 from .auth.auth import AuthError, requires_auth
 
