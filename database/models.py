@@ -3,11 +3,14 @@ from sqlalchemy import Column, String, create_engine, Table, Integer, String, Fo
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-database_name = 'postgres'
-database_user = 'postgres'
-database_password = 123
-database_host = 'localhost:5432'
-database_path = f'postgresql://{database_user}:{database_password}@{database_host}/{database_name}'
+# database_name = 'postgres'
+# database_user = 'postgres'
+# database_password = 123
+# database_host = 'localhost:5432'
+# database_path = f'postgresql://{database_user}:{database_password}@{database_host}/{database_name}'
+database_path = os.environ['DATABASE_URL']
+if database_path.startswith("postgres://"):
+  database_path = database_path.replace("postgres://", "postgresql://", 1)
 
 db = SQLAlchemy()
 
