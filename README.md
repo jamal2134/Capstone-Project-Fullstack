@@ -369,6 +369,25 @@ We need to retrun the url of auth0 for take the access token after sign in from 
 
 you will find in `test_flaskr.py` all the cmd of test
 
+## Upload The File To Github For Connect with Render For Deploy 
+
+1. Create file setup.sh
+2. Create file runtime.txt
+3. Create file Procfile
+
+* Connect The github account with render
+* Create database then add deteils in model
+* Create Project web serve and connect github repository
+* Deploy The Project
+
+### And This is my Url 
+
+```
+https://capstone-project-fullstack-83pg.onrender.com
+```
+
+
+
 
 
 
