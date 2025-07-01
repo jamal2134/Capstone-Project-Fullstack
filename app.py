@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, jsonify, redirect
 from models import *
 from flask_cors import CORS
-from .auth.auth import AuthError, requires_auth
+from auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
