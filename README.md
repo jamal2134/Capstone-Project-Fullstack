@@ -374,6 +374,7 @@ you will find in `test_flaskr.py` all the cmd of test
 1. Create file setup.sh
 2. Create file runtime.txt
 3. Create file Procfile
+4. Update databse details in `models.py`
 
 * Connect The github account with render
 * Create database then add deteils in model
