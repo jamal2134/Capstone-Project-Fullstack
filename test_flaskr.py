@@ -18,6 +18,10 @@ class CapstoneTestCase(unittest.TestCase):
         self.database_host = "localhost:5432"
         self.database_path = f"postgresql://{self.database_user}:{self.database_password}@{self.database_host}/{self.database_name}"
 
+        self.database_path = os.environ['DATABASE_URL']
+        if self.database_path.startswith("postgres://"):
+            self.database_path = database_path.replace("postgres://", "postgresql://", 1)
+
         # Create app with the test configuration
         self.app = create_app({
             "SQLALCHEMY_DATABASE_URI": self.database_path,
