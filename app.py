@@ -1,5 +1,6 @@
 from flask import Flask, request, abort, jsonify, redirect
 from models import *
+# from .database.models import *
 from flask_cors import CORS
 from auth import AuthError, requires_auth
 
@@ -13,10 +14,10 @@ def create_app(test_config=None):
     @app.route('/')
     def goto_signin():
         # excited = os.environ['EXCITED']
-        Domain = "dev-ht2o42qwj0gy43i8.us.auth0.com"
-        Client_ID = "CLJJSxZslRDQNLgHjZOBefrX8iX9YrDQ"
-        url_goback = 'http://localhost:5000/movies'
-        audience = 'Capstone'
+        Domain = os.environ['DOMAIN']
+        Client_ID = os.environ['CLIENT_ID']
+        url_goback = os.environ['URL_GOBACK']
+        audience = os.environ['API_AUDIENCE']
 
         url = f'https://{Domain}/authorize?audience={audience}&response_type=token&client_id={Client_ID}&redirect_uri={url_goback}'
 
@@ -397,10 +398,18 @@ def create_app(test_config=None):
             "message": error.error['description']
         }), error.status_code
 
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({"success": False, "error": 401, "message": "Unauthorized"}), 401
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return jsonify({"success": False, "error": 403, "message": "Forbidden"}), 403
+
     return app
 
 
-app = create_app()
+APP = create_app()
 
 if __name__ == '__main__':
-    app.run()
+    APP.run(host='0.0.0.0', port=8080, debug=True)

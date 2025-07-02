@@ -1,7 +1,12 @@
 import unittest
 import json
 from app import create_app
-from .database.models import db
+from models import db
+import os
+
+ASSISTANT_TOKEN = os.environ['ASSISTANT_TOKEN']
+DIRECTOR_TOKEN = os.environ['DIRECTOR_TOKEN']
+PRODUCER_TOKEN = os.environ['Producer']
 
 
 class CapstoneTestCase(unittest.TestCase):
@@ -18,10 +23,6 @@ class CapstoneTestCase(unittest.TestCase):
         self.database_host = "localhost:5432"
         self.database_path = f"postgresql://{self.database_user}:{self.database_password}@{self.database_host}/{self.database_name}"
 
-        self.database_path = os.environ['DATABASE_URL']
-        if self.database_path.startswith("postgres://"):
-            self.database_path = database_path.replace("postgres://", "postgresql://", 1)
-
         # Create app with the test configuration
         self.app = create_app({
             "SQLALCHEMY_DATABASE_URI": self.database_path,
@@ -31,11 +32,8 @@ class CapstoneTestCase(unittest.TestCase):
         self.client = self.app.test_client()
 
         self.new_movie = {"title": "Eternal Sunshine of the Spotless Mind", "release_date": "March 19, 2004"}
-        self.new_actor = {"name": "Jim Carrey", "age":"63", "gender": 'male'}
+        self.new_actor = {"name": "Jim Carrey", "age": "63", "gender": 'male'}
         self.new_movie_actor = {"movies_id": 1, "actors_id": 1}
-
-
-
 
         # Bind the app to the current context and create all tables
         with self.app.app_context():
@@ -46,40 +44,42 @@ class CapstoneTestCase(unittest.TestCase):
         with self.app.app_context():
             pass
 
-
     """
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-    #test index page success
+
+    # test index page success
     def test_index_page(self):
-        res = self.client.get("/")
+        res = self.client.get("/")  # No Authorization header
         self.assertEqual(res.status_code, 200)
         data = json.loads(res.data)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['greeting'], "Hello You are now in Project Full Stack Capstone.")
 
-    #test get movies success
+    # test get movies success
     def test_get_movies(self):
-        res = self.client.get("/movies")
+        res = self.client.get("/movies", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'}) # ASSISTANT_TOKEN has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         # self.assertEqual(data["success"], True)
         self.assertTrue(len(data["movies"]))
-    #test get movies failure
+
+    # test get movies failure
     def test_get_movies_failure(self):
-        res = self.client.get("/movies")
+        res = self.client.get("/movies")  # Without Authorization header
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 401)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
+        self.assertEqual(data["message"], "Unauthorized")
 
-
-    #test get movies success
+    # test get movies success
     def test_get_movies_details(self):
-        res = self.client.get("/movies-details")
+        res = self.client.get("/movies-details", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'}) # ASSISTANT_TOKEN has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -88,26 +88,27 @@ class CapstoneTestCase(unittest.TestCase):
 
     # test get movies success
     def test_get_actors(self):
-        res = self.client.get("/actors")
+        res = self.client.get("/actors", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'})  # ASSISTANT_TOKEN has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         # self.assertEqual(data["success"], True)
         self.assertTrue(len(data["actors"]))
 
-    #test get actors failure
+    # test get actors failure
     def test_get_actors_failure(self):
-        res = self.client.get("/actors")
+        res = self.client.get("/actors")  # Without Authorization header
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 401)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
-
+        self.assertEqual(data["message"], "Unauthorized")
 
     # test get movies success
     def test_get_actors_details(self):
-        res = self.client.get("/actors-details")
+        res = self.client.get("/actors-details", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'})  # ASSISTANT_TOKEN has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -115,7 +116,8 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertTrue(len(data["actors"]))
 
     def test_add_new_movie(self):
-        res = self.client.post("/movies", json=self.new_movie)
+        res = self.client.post("/movies", headers={
+            'Authorization': f'Bearer {PRODUCER_TOKEN}'}, json=self.new_movie)  # PRODUCER_TOKEN has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -123,37 +125,62 @@ class CapstoneTestCase(unittest.TestCase):
         # test get actors failure
 
     def test_add_movie_failure(self):
-        res = self.client.post("/movies", json={})
+        res = self.client.post("/movies", headers={
+            'Authorization': f'Bearer {PRODUCER_TOKEN}'}, json={})  # PRODUCER_TOKEN has authorized but without data
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "unprocessable")
 
+    def test_cannot_add_movie_failure(self):
+        res = self.client.post("/movies", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json=self.new_movie)  # DIRECTOR_TOKEN doesn't has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
+
     def test_add_new_actor(self):
-        res = self.client.post("/actors", json=self.new_actor)
+        res = self.client.post("/actors", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json=self.new_actor)  # DIRECTOR_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
 
     def test_add_actor_failure(self):
-        res = self.client.post("/actors", json={})
+        res = self.client.post("/actors", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json={})  # DIRECTOR_TOKEN has authorized but without data
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "unprocessable")
 
+    def test_cannot_add_actor_failure(self):
+        res = self.client.post("/actors", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'},
+                               json=self.new_movie)  # ASSISTANT_TOKEN doesn't has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
+
     def test_add_new_relationship(self):
-        res = self.client.post("/movies-actors", json=self.new_movie_actor)
+        res = self.client.post("/movies-actors", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json=self.new_movie_actor)# DIRECTOR_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
+
     # test_add_new_relationship failure
     def test_add_new_relationship_failure(self):
-        res = self.client.post("/movies-actors", json={"movies_id": 1})
+        res = self.client.post("/movies-actors", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json={})# DIRECTOR_TOKEN  has authorized  but without data
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
@@ -161,34 +188,72 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "unprocessable")
 
     def test_update_movie(self):
-        res = self.client.patch("/movies/1", json={"title":"YOYO2030"})
+        res = self.client.patch("/movies/1", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json={"title": "YOYO2030"})# DIRECTOR_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
+
+    def test_cannot_update_movie(self):
+        res = self.client.patch("/movies/1", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'}, json={"title": "YOYO2030"})# ASSISTANT_TOKEN doesn't  has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
 
     def test_update_actor(self):
-        res = self.client.patch("/actors/1", json={"age":"63"})
+        res = self.client.patch("/actors/1", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json={"age": "63"})# DIRECTOR_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
+
+    def test_cannot_update_actor(self):
+        res = self.client.patch("/actors/1", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'}, json={"title": "YOYO2030"})# ASSISTANT_TOKEN doesn't  has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
 
     def test_delete_movie(self):
-        res = self.client.delete("/movies/1")
+        res = self.client.delete("/movies/1", headers={
+            'Authorization': f'Bearer {PRODUCER_TOKEN}'})# PRODUCER_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
 
+    def test_cannot_delete_movie(self):
+        res = self.client.delete("/movies/1", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'})# DIRECTOR_TOKEN doesn't  has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
 
     def test_delete_actor(self):
-        res = self.client.delete("/actors/1")
+        res = self.client.delete("/actors/1", headers={
+            'Authorization': f'Bearer {DIRECTOR_TOKEN}'})# DIRECTOR_TOKEN  has authorized
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
 
+    def test_cannot_delete_actor(self):
+        res = self.client.delete("/actors/1", headers={
+            'Authorization': f'Bearer {ASSISTANT_TOKEN}'})# ASSISTANT_TOKEN doesn't  has authorized
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unauthorized")
 
 
 if __name__ == '__main__':

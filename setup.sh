@@ -1,2 +1,14 @@
 #!/bin/bash
+export DATABASE_URL="DATABASE_URL"
+export EXCITED="true"
+export AUTH0_DOMAIN='AUTH0_DOMAIN'
+export API_AUDIENCE='API_AUDIENCE'
+export DOMAIN='DOMAIN'
+export CLIENT_ID='CLIENT_ID'
+export URL_GOBACK='URL_GOBACK'
+
+export ASSISTANT_TOKEN='ASSISTANT_TOKEN'
+export DIRECTOR_TOKEN='DIRECTOR_TOKEN'
+export PRODUCER_TOKEN='PRODUCER_TOKEN'
+
 echo "setup.sh script executed successfully!"
