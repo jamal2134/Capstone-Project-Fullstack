@@ -138,9 +138,9 @@ class CapstoneTestCase(unittest.TestCase):
             'Authorization': f'Bearer {DIRECTOR_TOKEN}'}, json=self.new_movie)  # DIRECTOR_TOKEN doesn't has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
     def test_add_new_actor(self):
         res = self.client.post("/actors", headers={
@@ -165,9 +165,9 @@ class CapstoneTestCase(unittest.TestCase):
                                json=self.new_movie)  # ASSISTANT_TOKEN doesn't has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
     def test_add_new_relationship(self):
         res = self.client.post("/movies-actors", headers={
@@ -200,9 +200,9 @@ class CapstoneTestCase(unittest.TestCase):
             'Authorization': f'Bearer {ASSISTANT_TOKEN}'}, json={"title": "YOYO2030"})# ASSISTANT_TOKEN doesn't  has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
     def test_update_actor(self):
         res = self.client.patch("/actors/1", headers={
@@ -217,9 +217,9 @@ class CapstoneTestCase(unittest.TestCase):
             'Authorization': f'Bearer {ASSISTANT_TOKEN}'}, json={"title": "YOYO2030"})# ASSISTANT_TOKEN doesn't  has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
     def test_delete_movie(self):
         res = self.client.delete("/movies/1", headers={
@@ -234,9 +234,9 @@ class CapstoneTestCase(unittest.TestCase):
             'Authorization': f'Bearer {DIRECTOR_TOKEN}'})# DIRECTOR_TOKEN doesn't  has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
     def test_delete_actor(self):
         res = self.client.delete("/actors/1", headers={
@@ -251,9 +251,9 @@ class CapstoneTestCase(unittest.TestCase):
             'Authorization': f'Bearer {ASSISTANT_TOKEN}'})# ASSISTANT_TOKEN doesn't  has authorized
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "Unauthorized")
+        self.assertEqual(data["message"], "Forbidden")
 
 
 if __name__ == '__main__':
