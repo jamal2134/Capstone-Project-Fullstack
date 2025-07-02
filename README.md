@@ -39,23 +39,24 @@ The Casting Agency models a company that is responsible for creating movies and 
 pip install requirements.txt
 ```
 
-### Insert Your Postgres Database Details in models file
-* database_name
-* database_user
-* database_password
-* database_host
+### Insert in setup.sh 
+1. Your Postgres Database Details
+2. Your Auth0 Details
 
-### Insert Your Auth0 Details in auth file
+```bash
+export DATABASE_URL="DATABASE_URL"
+export EXCITED="true"
+export AUTH0_DOMAIN='AUTH0_DOMAIN'
+export API_AUDIENCE='API_AUDIENCE'
+export DOMAIN='DOMAIN'
+export CLIENT_ID='CLIENT_ID'
+export URL_GOBACK='URL_GOBACK'
 
-* AUTH0_DOMAIN
-* ALGORITHMS
-* API_AUDIENCE
+export ASSISTANT_TOKEN='ASSISTANT_TOKEN'
+export DIRECTOR_TOKEN='DIRECTOR_TOKEN'
+export PRODUCER_TOKEN='PRODUCER_TOKEN'
+```
 
-### Set Up Url of Auth0
-* Domain
-* Client_ID
-* url_goback
-* audience
 
 
 ### Set up the environment
